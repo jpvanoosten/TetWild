@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.23.0)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ################################################################################
@@ -177,3 +177,6 @@ set_target_properties(geogram_third_party PROPERTIES FOLDER extern/geogram)
 set_target_properties(uninstall PROPERTIES FOLDER extern/geogram)
 # pymesh
 set_target_properties(pymesh_tiny PROPERTIES FOLDER extern/pymesh)
+
+# Fix Error	LNK2038	mismatch detected for 'RuntimeLibrary': value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease' in main.obj	TetWild	geogram.lib(common.obj)	1
+set_target_properties(geogram PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
