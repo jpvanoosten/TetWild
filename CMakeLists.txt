@@ -162,6 +162,8 @@ target_link_libraries(TetWild
 target_include_directories(TetWild PRIVATE src)
 igl_copy_cgal_dll(TetWild)
 
+add_subdirectory( TetWildPlugin )
+
 # Install
 install(TARGETS TetWild RUNTIME DESTINATION bin)
 
