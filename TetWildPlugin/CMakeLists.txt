@@ -14,6 +14,5 @@ add_library(TetWildPlugin SHARED ${INC} ${SRC})
 
 target_link_libraries( TetWildPlugin 
 		libTetWild
-		CLI11::CLI11
-		igl::cgal
 )
+

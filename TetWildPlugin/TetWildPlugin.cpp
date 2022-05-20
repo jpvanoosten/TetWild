@@ -8,6 +8,10 @@
 #define TETWILD_API
 #endif
 
+struct double3
+{
+	double x, y, z;
+};
 
 #ifdef __cplusplus
 extern "C"
@@ -19,7 +23,7 @@ extern "C"
 		return 1;
 	}
 
-	TETWILD_API void TetWildPlugin_TetrahedralizeMesh()
+	TETWILD_API void TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices)
 	{
 		tetwild::Args args;
 
@@ -27,7 +31,24 @@ extern "C"
 		Eigen::MatrixXi FI, TO;
 		Eigen::VectorXd AO;
 
+		// Populate the input vertices.
+		VI.resize(numVertices, 3);
+		for (int i = 0; i < numVertices; ++i)
+		{
+			VI.row(i) << vertices[i].x, vertices[i].y, vertices[i].z;
+		}
+
+		// Populate the input faces (triangles lists).
+		FI.resize(numIndices / 3, 3);
+		for (int i = 0; i < FI.rows(); ++i)
+		{
+			FI.row(i) << indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2];
+		}
+
+		// Generate the tetrahedral mesh...
 		tetwild::tetrahedralization(VI, FI, VO, TO, AO, args);
+
+		// Save the tetrahedral mesh to a file...
 	}
 
 #ifdef __cplusplus
