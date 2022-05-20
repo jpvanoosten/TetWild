@@ -12,7 +12,12 @@ set( SRC
 
 add_library(TetWildPlugin SHARED ${INC} ${SRC})
 
+target_compile_definitions( TetWildPlugin
+	INTERFACE TetWildPlugin_IMPORTS
+)
+
 target_link_libraries( TetWildPlugin 
 		libTetWild
 )
+igl_copy_cgal_dll(TetWildPlugin)
 

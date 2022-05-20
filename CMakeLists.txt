@@ -11,7 +11,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 option(TETWILD_WITH_HUNTER "Use Hunter to download and configure Boost" OFF)
 option(TETWILD_WITH_ISPC   "Use ISPC"                                   OFF)
 # libigl library
-option(LIBIGL_USE_STATIC_LIBRARY "Use libigl as static library" OFF)
+option(LIBIGL_USE_STATIC_LIBRARY "Use libigl as static library" ON)
 option(LIBIGL_WITH_ANTTWEAKBAR      "Use AntTweakBar"    OFF)
 option(LIBIGL_WITH_CGAL             "Use CGAL"           ON)
 option(LIBIGL_WITH_COMISO           "Use CoMiso"         OFF)

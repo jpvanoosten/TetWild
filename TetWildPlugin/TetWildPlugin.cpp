@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 
-#if defined(TETWILDPLUGIN_EXPORTS)
+#if defined(TetWildPlugin_EXPORTS)
 #define TETWILD_API __declspec(dllexport) 
-#elif defined(TETWILDPLUGIN_IMPORTS)
+#elif defined(TetWildPlugin_IMPORTS)
 #define TETWILD_API __declspec(dllimport)
 #else
 #define TETWILD_API
