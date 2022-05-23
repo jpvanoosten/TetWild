@@ -162,6 +162,11 @@ target_link_libraries(TetWild
 target_include_directories(TetWild PRIVATE src)
 igl_copy_cgal_dll(TetWild)
 
+# Set Local Debugger Settings (Command Arguments and Environment Variables)
+set( COMMAND_ARGUMENTS "--input \"${CMAKE_CURRENT_SOURCE_DIR}/test/bunny.obj\"" )
+configure_file( DebugSettings.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/TetWild.vcxproj.user @ONLY )
+
+
 add_subdirectory( TetWildPlugin )
 
 # Install

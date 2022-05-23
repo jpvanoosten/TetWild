@@ -15,4 +15,7 @@
 
 #include <tetwild/tetwild.h>
 
+#include <iostream>
+#include <sstream>
+
 #endif //PCH_H
