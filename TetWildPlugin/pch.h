@@ -13,10 +13,15 @@
 // Windows Header Files
 #include <Windows.h>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/base_sink.h>
 #include <tetwild/tetwild.h>
+#include <tetwild/Logger.h>
 
+#include <atomic>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 #include "PluginAPI/IUnityEventQueue.h"
 //#include "PluginAPI/IUnityGraphics.h"
