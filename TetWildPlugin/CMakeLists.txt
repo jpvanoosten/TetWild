@@ -1,6 +1,18 @@
 cmake_minimum_required(VERSION 3.3)
 
 set( INC
+	PluginAPI/IUnityShaderCompilerAccess.h
+	PluginAPI/IUnityEventQueue.h
+	PluginAPI/IUnityGraphics.h
+	PluginAPI/IUnityGraphicsD3D11.h
+	PluginAPI/IUnityGraphicsD3D12.h
+	PluginAPI/IUnityGraphicsMetal.h
+	PluginAPI/IUnityGraphicsVulkan.h
+	PluginAPI/IUnityInterface.h
+	PluginAPI/IUnityLog.h
+	PluginAPI/IUnityProfiler.h
+	PluginAPI/IUnityProfilerCallbacks.h
+	PluginAPI/IUnityRenderingExtensions.h
 	pch.h
 )
 

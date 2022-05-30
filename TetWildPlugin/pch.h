@@ -18,4 +18,18 @@
 #include <iostream>
 #include <sstream>
 
+#include "PluginAPI/IUnityEventQueue.h"
+//#include "PluginAPI/IUnityGraphics.h"
+//#include "PluginAPI/IUnityGraphicsD3D11.h"
+//#include "PluginAPI/IUnityGraphicsD3D12.h"
+//#include "PluginAPI/IUnityGraphicsMetal.h"
+//#include "PluginAPI/IUnityGraphicsVulkan.h"
+#include "PluginAPI/IUnityInterface.h"
+#include "PluginAPI/IUnityLog.h"
+#include "PluginAPI/IUnityEventQueue.h"
+#include "PluginAPI/IUnityProfiler.h"
+#include "PluginAPI/IUnityProfilerCallbacks.h"
+#include "PluginAPI/IUnityRenderingExtensions.h"
+#include "PluginAPI/IUnityShaderCompilerAccess.h"
+
 #endif //PCH_H

@@ -1,48 +1,37 @@
 ﻿#include "pch.h"
 
-#if defined(TetWildPlugin_EXPORTS)
-#define TETWILD_API __declspec(dllexport) 
-#elif defined(TetWildPlugin_IMPORTS)
-#define TETWILD_API __declspec(dllimport)
-#else
-#define TETWILD_API
-#endif
-
 struct double3
 {
 	double x, y, z;
 };
 
-// Forward declare.
-// Definition is below.
-void TetWild_DebugLog(const std::stringstream& ss);
+static IUnityInterfaces* s_UnityInterfaces = nullptr;
+static IUnityLog* s_UnityLog = nullptr;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-	TETWILD_API int TetWildPlugin_GetVersion()
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
+	{
+		s_UnityInterfaces = unityInterfaces;
+		s_UnityLog = s_UnityInterfaces->Get<IUnityLog>();
+
+		assert(s_UnityLog);
+	}
+
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityPluginUnload()
+	{
+		
+	}
+	
+	int UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_GetVersion()
 	{
 		return 1;
 	}
 
-	// Register a callback function to print messages in Unity.
-	using UnityDebugCallback = void(*)(const char*);
-	static UnityDebugCallback unityDebugCallback = nullptr;
-
-	TETWILD_API void TetWildPlugin_RegisterDebugCallback(UnityDebugCallback cb)
-	{
-		unityDebugCallback = cb;
-	}
-
-	void TetWild_DebugLog(const char* message)
-	{
-		if (unityDebugCallback)
-			unityDebugCallback(message);
-	}
-
-	TETWILD_API void TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices)
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices)
 	{
 		tetwild::Args args;
 
@@ -55,7 +44,8 @@ extern "C"
 		ss << "[TetWild] Num vertices: " << numVertices << std::endl;
 		ss << "[TetWild] Num indices:  " << numIndices << std::endl;
 
-		TetWild_DebugLog(ss);
+		UNITY_LOG(s_UnityLog, ss.str().c_str());
+
 		ss.clear();
 
 		// Populate the input vertices.
@@ -72,21 +62,14 @@ extern "C"
 			FI.row(i) << indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2];
 		}
 
-		TetWild_DebugLog("Starting tetrahedralization...");
+		UNITY_LOG(s_UnityLog, "Starting tetrahedralization...");
 
 		tetwild::tetrahedralization(VI, FI, VO, TO, AO, args);
 
-		TetWild_DebugLog("Mesh tetrahedralization complete!");
+		UNITY_LOG(s_UnityLog, "Mesh tetrahedralization complete!");
 
 	}
 
 #ifdef __cplusplus
 }
 #endif
-
-void TetWild_DebugLog(const std::stringstream& ss)
-{
-	const std::string& s = ss.str();
-	const char* c = s.c_str();
-	TetWild_DebugLog(c);
-}
