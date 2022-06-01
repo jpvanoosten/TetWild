@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 
 set( INC
+	ProgressHandler.h
 	PluginAPI/IUnityShaderCompilerAccess.h
 	PluginAPI/IUnityEventQueue.h
 	PluginAPI/IUnityGraphics.h
@@ -19,6 +20,7 @@ set( INC
 set( SRC
 	dllmain.cpp
 	pch.cpp
+	ProgressHandler.cpp
 	TetWildPlugin.cpp
 )
 

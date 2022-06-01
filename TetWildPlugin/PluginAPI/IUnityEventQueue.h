@@ -378,7 +378,7 @@ namespace UnityEventQueue
         void SendEvent(T & payload)
         {
             // Ensure we never fire an event that we can't handle size wise.
-            Assert(sizeof(T) <= (kMaxEventQueueEventSize - sizeof(EventId)));
+            assert(sizeof(T) <= (kMaxEventQueueEventSize - sizeof(EventId)));
 
             // NOTE: Keep this small to avoid code bloat.
             //       every line of code in here should be scrutinized
