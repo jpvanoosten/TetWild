@@ -1,15 +1,23 @@
 ﻿#include "pch.h"
 
-#include "ProgressHandler.h"
-
-// Define a callback function that can be used to send progress updates back to unity.
+// Define a callback function that can be used to send progress updates back to Unity.
 using ProgressCallback = void(*)(float, const char*);
 static ProgressCallback progressCallback = nullptr;
+
+// Define a callback function that can be used to send a complete notification to Unity.
+using CompleteCallback = void(*)();
+static CompleteCallback completeCallback = nullptr;
 
 void SendProgressUpdate(float progress, const char* msg)
 {
 	if (progressCallback)
 		progressCallback(progress, msg);
+}
+
+void SendCompleteMessage()
+{
+	if (completeCallback)
+		completeCallback();
 }
 
 struct double3
@@ -45,11 +53,9 @@ protected:
 		case spdlog::level::critical:
 			UNITY_LOG_ERROR(s_UnityLog, message.c_str());
 			break;
-		case spdlog::level::off: 
+		case spdlog::level::off:
 			break;
 		}
-
-		//SendProgressUpdate(0.0f, message.c_str());
 	}
 
 	void flush_() override
@@ -58,19 +64,61 @@ protected:
 
 using UnitySink_mt = UnitySink<std::mutex>;
 
-static void TetrahedralizeMesh(Eigen::MatrixXd VI, Eigen::MatrixXi FI, ProgressHandler* progressHandler)
+// A progress handler that sends progress messages back to Unity.
+class ProgressHandler : public tetwild::ProgressHandler
 {
+public:
+	ProgressHandler(int totalSteps)
+		:totalSteps(totalSteps)
+		, currentStep(0)
+	{}
+
+protected:
+	void DoMessage(spdlog::level::level_enum level, const std::string& message) const override
+	{
+		switch (level)
+		{
+		case spdlog::level::trace:
+		case spdlog::level::debug:
+			break;
+		case spdlog::level::info:
+			currentStep++;
+			SendProgressUpdate(static_cast<float>(currentStep) / static_cast<float>(totalSteps) * 100.0f, message.c_str());
+			//SendProgressUpdate(currentStep, message.c_str());
+			break;
+		case spdlog::level::warn:
+		case spdlog::level::err:
+		case spdlog::level::critical:
+		case spdlog::level::off:
+			break;
+		}
+	}
+
+private:
+	int totalSteps = 1;
+	mutable int currentStep = 0;
+};
+
+static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi& FI)
+{
+	tetwild::ProgressHandler::SetProgressHandler(std::make_shared<ProgressHandler>(55));
+
 	tetwild::Args args;
 
 	Eigen::MatrixXd VO;
 	Eigen::MatrixXi TO;
 	Eigen::VectorXd AO;
 
-	progressHandler->Update(0.0f, "Starting tetrahedralization...");
+	tetwild::ProgressHandler::Info("Starting mesh tetrahedralization...");
 
-	tetwild::tetrahedralization(VI, FI, VO, TO, AO, args);
+	tetrahedralization(VI, FI, VO, TO, AO, args);
 
-	progressHandler->Update(100.0f, "Mesh tetrahedralization complete!");
+	tetwild::ProgressHandler::Info("Mesh tetrahedralization complete!");
+
+	tetwild::ProgressHandler::SetProgressHandler(nullptr);
+
+	// Notify Unity the operation is complete.
+	SendCompleteMessage();
 }
 
 #ifdef __cplusplus
@@ -84,6 +132,7 @@ extern "C"
 
 		assert(s_UnityLog);
 
+		// Add a spdlog sink that sends messages to Unity's console.
 		tetwild::logger().sinks().push_back(std::make_shared<UnitySink_mt>());
 	}
 
@@ -102,14 +151,15 @@ extern "C"
 		progressCallback = cb;
 	}
 
-
-	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices, ProgressHandler* progressHandler)
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_RegisterCompleteCallback(CompleteCallback cb)
+	{
+		completeCallback = cb;
+	}
+	
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices)
 	{
 		Eigen::MatrixXd VI;
 		Eigen::MatrixXi FI;
-
-		tetwild::logger().info("Num vertices: {}", numVertices);
-		tetwild::logger().info("Num indices: {}", numIndices);
 
 		// Populate the input vertices.
 		VI.resize(numVertices, 3);
@@ -125,7 +175,7 @@ extern "C"
 			FI.row(i) << indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2];
 		}
 
-		std::thread t{ &TetrahedralizeMesh, std::move(VI), std::move(FI), progressHandler };
+		std::thread t{ &TetrahedralizeMesh, std::move(VI), std::move(FI) };
 		t.detach();
 	}
 

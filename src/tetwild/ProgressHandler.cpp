@@ -4,7 +4,7 @@ using namespace tetwild;
 
 static std::shared_ptr<ProgressHandler> gs_DefaultProgressHandler = std::make_shared<DefaultProgressHandler>();
 
-std::weak_ptr<ProgressHandler> ProgressHandler::s_ProgressHandler = gs_DefaultProgressHandler;
+std::shared_ptr<ProgressHandler> ProgressHandler::s_ProgressHandler = gs_DefaultProgressHandler;
 
 void ProgressHandler::SetProgressHandler(std::shared_ptr<ProgressHandler> progressHandler)  // NOLINT(performance-unnecessary-value-param)
 {
@@ -13,6 +13,6 @@ void ProgressHandler::SetProgressHandler(std::shared_ptr<ProgressHandler> progre
 
 std::shared_ptr<ProgressHandler> ProgressHandler::GetProgressHandler()
 {
-	return s_ProgressHandler.lock();
+	return s_ProgressHandler;
 }
 

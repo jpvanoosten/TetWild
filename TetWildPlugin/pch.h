@@ -16,7 +16,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/base_sink.h>
 #include <tetwild/tetwild.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 
 #include <atomic>
 #include <iostream>
