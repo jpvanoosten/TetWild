@@ -12,7 +12,7 @@
 #include <tetwild/LocalOperations.h>
 #include <tetwild/Common.h>
 #include <tetwild/Args.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <tetwild/DistanceQuery.h>
 #include <pymesh/MshSaver.h>
 #include <igl/svd3x3.h>
@@ -300,15 +300,15 @@ void LocalOperations::check() {
 
         for (auto it = tet_vertices[i].conn_tets.begin(); it != tet_vertices[i].conn_tets.end(); it++) {
             if (t_is_removed[*it])
-                logger().debug("t {} is removed!", *it);
+                ProgressHandler::Debug("t {} is removed!", *it);
             auto jt=std::find(tets[*it].begin(), tets[*it].end(), i);
             if(jt==tets[*it].end()){
-                logger().debug("t {} is not a conn_tet for v {}", *it, i);
+                ProgressHandler::Debug("t {} is not a conn_tet for v {}", *it, i);
             }
         }
 
         if(tet_vertices[i].conn_tets.size()==0) {
-            logger().debug("empty conn_tets: v {}", i);
+            ProgressHandler::Debug("empty conn_tets: v {}", i);
             assert(tet_vertices[i].conn_tets.size()>0);
         }
 
@@ -333,11 +333,11 @@ void LocalOperations::check() {
                     is_found = true;
                 }
                 if (t_is_removed[*it])
-                    logger().debug("tet {} is removed!", *it);
+                    ProgressHandler::Debug("tet {} is removed!", *it);
             }
             if (!is_found) {
-                logger().debug("{} {} {} {}", tets[i][0], tets[i][1], tets[i][2], tets[i][3]);
-                logger().debug("tet {} should be conn to v {}", i, tets[i][j]);
+                ProgressHandler::Debug("{} {} {} {}", tets[i][0], tets[i][1], tets[i][2], tets[i][3]);
+                ProgressHandler::Debug("tet {} should be conn to v {}", i, tets[i][j]);
             }
         }
     }
@@ -346,7 +346,7 @@ void LocalOperations::check() {
 }
 
 void LocalOperations::outputInfo(int op_type, double time, bool is_log) {
-    logger().debug("outputing info");
+    ProgressHandler::Debug("outputing info");
     //update min/max dihedral angle infos
     for (int i = 0; i < tets.size(); i++) {
         if (!t_is_removed[i])
@@ -476,16 +476,16 @@ void LocalOperations::outputInfo(int op_type, double time, bool is_log) {
     }
 
 
-    logger().debug("# vertices = {}({}) {}(r)", cnt, tet_vertices.size(), r_cnt);
+    ProgressHandler::Debug("# vertices = {}({}) {}(r)", cnt, tet_vertices.size(), r_cnt);
 
     cnt = 0;
     for (int i = 0; i < tets.size(); i++) {
         if (!t_is_removed[i])
             cnt++;
     }
-    logger().debug("# tets = {}({})", cnt, tets.size());
-    logger().debug("# total operations = {}", counter);
-    logger().debug("# accepted operations = {}", suc_counter);
+	ProgressHandler::Debug("# tets = {}({})", cnt, tets.size());
+	ProgressHandler::Debug("# total operations = {}", counter);
+	ProgressHandler::Debug("# accepted operations = {}", suc_counter);
 
 
     double min = 10, max = 0;
@@ -521,10 +521,10 @@ void LocalOperations::outputInfo(int op_type, double time, bool is_log) {
         }
     }
 
-    logger().debug("min_d_angle = {}, max_d_angle = {}, max_slim_energy = {}", min, max, max_slim_energy);
-    logger().debug("avg_min_d_angle = {}, avg_max_d_angle = {}, avg_slim_energy = {}", min_avg / cnt, max_avg / cnt, avg_slim_energy / cnt);
-    logger().debug("min_d_angle: <6 {};   <12 {};  <18 {}", cmp_cnt[0] / cnt, cmp_cnt[1] / cnt, cmp_cnt[2] / cnt);
-    logger().debug("max_d_angle: >174 {}; >168 {}; >162 {}", cmp_cnt[5] / cnt, cmp_cnt[4] / cnt, cmp_cnt[3] / cnt);
+    ProgressHandler::Debug("min_d_angle = {}, max_d_angle = {}, max_slim_energy = {}", min, max, max_slim_energy);
+    ProgressHandler::Debug("avg_min_d_angle = {}, avg_max_d_angle = {}, avg_slim_energy = {}", min_avg / cnt, max_avg / cnt, avg_slim_energy / cnt);
+    ProgressHandler::Debug("min_d_angle: <6 {};   <12 {};  <18 {}", cmp_cnt[0] / cnt, cmp_cnt[1] / cnt, cmp_cnt[2] / cnt);
+    ProgressHandler::Debug("max_d_angle: >174 {}; >168 {}; >162 {}", cmp_cnt[5] / cnt, cmp_cnt[4] / cnt, cmp_cnt[3] / cnt);
 
     if(is_log) {
         addRecord(MeshRecord(op_type, time, std::count(v_is_removed.begin(), v_is_removed.end(), false), cnt,
@@ -1089,7 +1089,7 @@ bool LocalOperations::isFaceOutEnvelop_sampling(const Triangle_3f& tri) {
 #if TIMING_BREAKDOWN
             breakdown_timing0[id_aabb] += igl_timer0.getElapsedTime();
 #endif
-            logger().trace("num_queries {} / {}", num_queries, num_samples);
+            ProgressHandler::Trace("num_queries {} / {}", num_queries, num_samples);
             return true;
         }
         cnt++;
@@ -1101,7 +1101,7 @@ bool LocalOperations::isFaceOutEnvelop_sampling(const Triangle_3f& tri) {
     breakdown_timing0[id_aabb] += igl_timer0.getElapsedTime();
 #endif
 
-    logger().trace("num_queries {} / {}", num_queries, num_samples);
+    ProgressHandler::Trace("num_queries {} / {}", num_queries, num_samples);
     return false;
 #else
     return false;

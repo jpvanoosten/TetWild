@@ -49,7 +49,7 @@ protected:
 			break;
 		}
 
-		SendProgressUpdate(0.0f, message.c_str());
+		//SendProgressUpdate(0.0f, message.c_str());
 	}
 
 	void flush_() override

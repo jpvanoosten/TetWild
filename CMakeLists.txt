@@ -84,8 +84,11 @@ include(TetWildDependencies)
 # Build static library for executable
 add_library(libTetWild 
 		include/tetwild/Args.h
+		include/tetwild/DisableWarnings.h
+		include/tetwild/EnableWarnings.h
 		include/tetwild/Exception.h
 		include/tetwild/Logger.h
+		include/tetwild/ProgressHandler.h
 		include/tetwild/tetwild.h
 		src/tetwild/BSPSubdivision.cpp
 		src/tetwild/BSPSubdivision.h
@@ -114,6 +117,7 @@ add_library(libTetWild
 		src/tetwild/MeshRefinement.h
 		src/tetwild/Preprocess.cpp
 		src/tetwild/Preprocess.h
+		src/tetwild/ProgressHandler.cpp
 		src/tetwild/SimpleTetrahedralization.cpp
 		src/tetwild/SimpleTetrahedralization.h
 		src/tetwild/State.cpp

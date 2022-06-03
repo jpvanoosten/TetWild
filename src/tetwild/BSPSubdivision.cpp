@@ -11,7 +11,7 @@
 
 #include <tetwild/BSPSubdivision.h>
 #include <tetwild/MeshConformer.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 
 namespace tetwild {
 
@@ -30,7 +30,7 @@ void BSPSubdivision::init() {
 		}
 		nf+=1;
 	}
-	logger().debug("# nodes need subdivision = {}/{}/{}", nf, processing_n_ids.size(), MC.bsp_nodes.size());
+	ProgressHandler::Debug("# nodes need subdivision = {}/{}/{}", nf, processing_n_ids.size(), MC.bsp_nodes.size());
 }
 
 void BSPSubdivision::subdivideBSPNodes() {

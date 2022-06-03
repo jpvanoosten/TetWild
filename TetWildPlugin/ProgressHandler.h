@@ -26,8 +26,8 @@ public:
 	///	<returns>`true` to continue processing, or `false` to stop processing the operation.</returns>
 	bool Update(float progress, const std::string& message)
 	{
-		if (unityCallback)
-			continueOperation = unityCallback(progress, message.c_str());
+		//if (unityCallback)
+		//	continueOperation = unityCallback(progress, message.c_str());
 
 		return continueOperation;
 	}

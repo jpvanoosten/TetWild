@@ -12,33 +12,34 @@
 #pragma once
 
 #include <tetwild/Args.h>
+#include <tetwild/ProgressHandler.h>
 #include <Eigen/Dense>
 
 namespace tetwild {
 
-///
-/// Robust tetrahedralization of an input triangle soup, with an envelope constraint.
-///
-/// @param[in]  VI    { #VI x 3 input mesh vertices }
-/// @param[in]  FI    { #FI x 3 input mesh triangles }
-/// @param[out] VO    { #VO x 3 output mesh vertices }
-/// @param[out] TO    { #TO x 4 output mesh tetrahedra }
-/// @param[out] AO    { #TO x 1 array of min dihedral angle over each tet }
-/// @param[in]  args  { Extra arguments controlling the behavior of TetWild }
-///
-void tetrahedralization(const Eigen::MatrixXd &VI, const Eigen::MatrixXi &FI,
-    Eigen::MatrixXd &VO, Eigen::MatrixXi &TO, Eigen::VectorXd &AO, const Args &args = Args());
+	///
+	/// Robust tetrahedralization of an input triangle soup, with an envelope constraint.
+	///
+	/// @param[in]  VI    { #VI x 3 input mesh vertices }
+	/// @param[in]  FI    { #FI x 3 input mesh triangles }
+	/// @param[out] VO    { #VO x 3 output mesh vertices }
+	/// @param[out] TO    { #TO x 4 output mesh tetrahedra }
+	/// @param[out] AO    { #TO x 1 array of min dihedral angle over each tet }
+	/// @param[in]  args  { Extra arguments controlling the behavior of TetWild }
+	/// @param[in]  progressHandler { An optional pointer to a progress handler to receive progress messages. }
+	void tetrahedralization(const Eigen::MatrixXd& VI, const Eigen::MatrixXi& FI,
+		Eigen::MatrixXd& VO, Eigen::MatrixXi& TO, Eigen::VectorXd& AO, const Args& args = Args(), const ProgressHandler* progressHandler = nullptr);
 
-///
-/// Extract the boundary facets of a triangle mesh, removing unreferenced vertices
-///
-/// @param[in]  VI    { #VI x 3 input mesh vertices }
-/// @param[in]  TI    { #TI x 4 input mesh tetrahedra }
-/// @param[out] VS    { #VS x 3 output mesh vertices }
-/// @param[out] FS    { #FS x 3 output mesh triangles }
-///
-void extractSurfaceMesh(const Eigen::MatrixXd &VI, const Eigen::MatrixXi &TI,
-    Eigen::MatrixXd &VS, Eigen::MatrixXi &FS);
+	///
+	/// Extract the boundary facets of a triangle mesh, removing unreferenced vertices
+	///
+	/// @param[in]  VI    { #VI x 3 input mesh vertices }
+	/// @param[in]  TI    { #TI x 4 input mesh tetrahedra }
+	/// @param[out] VS    { #VS x 3 output mesh vertices }
+	/// @param[out] FS    { #FS x 3 output mesh triangles }
+	///
+	void extractSurfaceMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi& TI,
+		Eigen::MatrixXd& VS, Eigen::MatrixXi& FS);
 
 } // namespace tetwild
 

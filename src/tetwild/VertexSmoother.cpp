@@ -11,7 +11,7 @@
 
 #include <tetwild/VertexSmoother.h>
 #include <tetwild/Common.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <pymesh/MshSaver.h>
 
 namespace tetwild {
@@ -33,14 +33,14 @@ void VertexSmoother::smooth() {
             smoothSurface();
             suc_surface = suc_counter;
         }
-        logger().debug("{}", (suc_in + suc_surface) / v_cnt);
+        ProgressHandler::Debug("{}", (suc_in + suc_surface) / v_cnt);
         if (suc_in + suc_surface < v_cnt * 0.1) {
-            logger().debug("{}", i);
+            ProgressHandler::Debug("{}", i);
             break;
         }
     }
     for (int i = 0; i < breakdown_timing.size(); i++) {
-        logger().debug("{}: {}s", breakdown_name[i], breakdown_timing[i]);
+        ProgressHandler::Debug("{}: {}s", breakdown_name[i], breakdown_timing[i]);
         breakdown_timing[i] = 0;//reset
     }
 }
@@ -92,7 +92,7 @@ bool VertexSmoother::smoothSingleVertex(int v_id, bool is_cal_energy){
         tet_vertices[v_id].posf = pf;
         tet_vertices[v_id].is_rounded = true;
         if (isFlip(new_tets)) {//TODO: why it happens?
-            logger().debug("flip in the end");
+            ProgressHandler::Debug("flip in the end");
             tet_vertices[v_id].pos = old_p;
             tet_vertices[v_id].posf = old_pf;
             tet_vertices[v_id].is_rounded = old_is_rounded;
@@ -194,7 +194,7 @@ void VertexSmoother::smoothSingle() {
             tet_vertices[v_id].posf = pf;
             tet_vertices[v_id].is_rounded = true;
             if (isFlip(new_tets)) {//TODO: why it happens?
-                logger().debug("flip in the end");
+                ProgressHandler::Debug("flip in the end");
                 tet_vertices[v_id].pos = old_p;
                 tet_vertices[v_id].posf = old_pf;
                 tet_vertices[v_id].is_rounded = old_is_rounded;
@@ -457,9 +457,9 @@ void VertexSmoother::smoothSurface() {//smoothing surface using two methods
         suc_counter++;
         sf_suc_counter++;
         if (sf_suc_counter % 1000 == 0)
-            logger().debug("1000 accepted!");
+            ProgressHandler::Debug("1000 accepted!");
     }
-    logger().debug("Totally {}({}) vertices on surface are smoothed.", sf_suc_counter, sf_counter);
+    ProgressHandler::Debug("Totally {}({}) vertices on surface are smoothed.", sf_suc_counter, sf_counter);
 }
 
 bool VertexSmoother::NewtonsMethod(const std::vector<int>& t_ids, const std::vector<std::array<int, 4>>& new_tets,
@@ -617,7 +617,7 @@ double VertexSmoother::getNewEnergy(const std::vector<int>& t_ids) {
     }
 #endif
     if (std::isinf(s_energy) || std::isnan(s_energy) || s_energy <= 0 || s_energy > state.MAX_ENERGY) {
-        logger().debug("new E inf");
+        ProgressHandler::Debug("new E inf");
         s_energy = state.MAX_ENERGY;
     }
 
@@ -678,23 +678,23 @@ bool VertexSmoother::NewtonsUpdate(const std::vector<int>& t_ids, int v_id,
 #endif
 
     if (std::isinf(energy)) {
-        logger().debug("{} E inf", v_id);
+        ProgressHandler::Debug("{} E inf", v_id);
         energy = state.MAX_ENERGY;
     }
     if (std::isnan(energy)) {
-        logger().debug("{} E nan", v_id);
+        ProgressHandler::Debug("{} E nan", v_id);
         return false;
     }
     if (energy <= 0) {
-        logger().debug("{} E < 0", v_id);
+        ProgressHandler::Debug("{} E < 0", v_id);
         return false;
     }
     if (!J.allFinite()) {
-        logger().debug("{} J inf/nan", v_id);
+        ProgressHandler::Debug("{} J inf/nan", v_id);
         return false;
     }
     if (!H.allFinite()) {
-        logger().debug("{} H inf/nan", v_id);
+        ProgressHandler::Debug("{} H inf/nan", v_id);
         return false;
     }
 
@@ -815,8 +815,8 @@ int VertexSmoother::laplacianBoundary(const std::vector<int>& b_v_ids, const std
         }
 
         // do normal smoothing on neighbor vertices
-//        logger().debug("n_v_ids.size = {}", n_v_ids.size());
-//        logger().debug("n_v_ids2.size = {}", n_v_ids2.size());
+//        ProgressHandler::Debug("n_v_ids.size = {}", n_v_ids.size());
+//        ProgressHandler::Debug("n_v_ids2.size = {}", n_v_ids2.size());
         for(int n_v_id:n_v_ids){
             smoothSingleVertex(n_v_id, true);
         }
@@ -828,7 +828,7 @@ int VertexSmoother::laplacianBoundary(const std::vector<int>& b_v_ids, const std
 //        }
     }
 
-    logger().debug("suc.size = {}", cnt_suc);
+    ProgressHandler::Debug("suc.size = {}", cnt_suc);
     return cnt_suc;
 }
 

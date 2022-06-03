@@ -13,7 +13,7 @@
 #include <tetwild/Args.h>
 #include <tetwild/Common.h>
 #include <tetwild/State.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <tetwild/DistanceQuery.h>
 #include <pymesh/MshSaver.h>
 #include <igl/fit_plane.h>
@@ -73,12 +73,12 @@ void checkBoundary(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const Sta
                                       std::back_inserter(tmp));
                 if (tmp.size() == 1) {
                     bF(tmp[0]) = 1;
-//                    logger().debug("boundary tri! {}", tmp[0]);
+//                    ProgressHandler::Debug("boundary tri! {}", tmp[0]);
 //                    Triangle_3f tri(Point_3f(V(F(i, 0), 0), V(F(i, 0), 1), V(F(i, 0), 2)),
 //                                    Point_3f(V(F(i, 1), 0), V(F(i, 1), 1), V(F(i, 1), 2)),
 //                                    Point_3f(V(F(i, 2), 0), V(F(i, 2), 1), V(F(i, 2), 2)));
 //                    if(tri.is_degenerate())
-//                        logger().debug("degenerate");
+//                        ProgressHandler::Debug("degenerate");
                     bV(F(i, j)) = 1;
                     bV(F(i, (j + 1) % 3)) = 1;
                 }
@@ -89,7 +89,7 @@ void checkBoundary(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const Sta
         mSaver.save_scalar_field("boundary vertices", bV);
     }
 
-    logger().debug("boundary checked!");
+    ProgressHandler::Debug("boundary checked!");
 }
 
 } // anonymous namespace
@@ -97,7 +97,7 @@ void checkBoundary(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const Sta
 bool Preprocess::init(const Eigen::MatrixXd& V_tmp, const Eigen::MatrixXi& F_tmp,
                       GEO::Mesh& geo_b_mesh, GEO::Mesh& geo_sf_mesh, const Args &args) {
 
-    logger().debug("{} {}", V_tmp.rows(), F_tmp.rows());
+    ProgressHandler::Debug("{} {}", V_tmp.rows(), F_tmp.rows());
 
     Eigen::VectorXi IV, _;
 //        igl::unique_rows(V_tmp, V_in, _, IV);
@@ -111,8 +111,8 @@ bool Preprocess::init(const Eigen::MatrixXd& V_tmp, const Eigen::MatrixXi& F_tmp
 //                F_in(i, j) = IV(F_in(i, j));
 //            }
 //        }
-    logger().debug("#v = {} -> {}", V_tmp.rows(), V_in.rows());
-    logger().debug("#f = {} -> {}", F_tmp.rows(), F_in.rows());
+    ProgressHandler::Debug("#v = {} -> {}", V_tmp.rows(), V_in.rows());
+    ProgressHandler::Debug("#f = {} -> {}", F_tmp.rows(), F_in.rows());
 //    checkBoundary(V_in, F_in, state);
 
     ////get GEO meshes
@@ -149,7 +149,7 @@ void Preprocess::getBoundaryMesh(GEO::Mesh& b_mesh) {
     //check isolated vertices
 //    for(int i=0;i<conn_f4v.size();i++){
 //        if(conn_f4v[i].size()==0)
-//            logger().debug("iso");
+//            ProgressHandler::Debug("iso");
 //    }
 
     std::vector<std::array<int, 2>> b_edges;
@@ -264,8 +264,8 @@ void Preprocess::process(GEO::Mesh& geo_sf_mesh, std::vector<Point_3>& m_vertice
         cnt++;
     }
 //    igl::writeSTL(state.working_dir+args.postfix+"_simplified.stl", V_out, F_out);
-    logger().debug("#v = {}", V_out.rows());
-    logger().debug("#f = {}", F_out.rows());
+    ProgressHandler::Debug("#v = {}", V_out.rows());
+    ProgressHandler::Debug("#f = {}", F_out.rows());
 
     V_in = V_out;
     F_in = F_out;
@@ -292,8 +292,8 @@ void Preprocess::process(GEO::Mesh& geo_sf_mesh, std::vector<Point_3>& m_vertice
         if (!tr.is_degenerate())//delete all degenerate triangles
             m_faces.push_back(f);
     }
-    logger().debug("#v = {}", m_vertices.size());
-    logger().debug("#f = {}->{}", F_in.rows(), m_faces.size());
+    ProgressHandler::Debug("#v = {}", m_vertices.size());
+    ProgressHandler::Debug("#f = {}->{}", F_in.rows(), m_faces.size());
 
     state.eps /= eps_scalar;
     state.eps_2 /= eps_scalar_2;
@@ -401,7 +401,7 @@ void Preprocess::swap(const GEO::Mesh &geo_mesh, const GEO::MeshFacetsAABBWithEp
         if (is_swapped)
             cnt++;
     }
-    logger().debug("{} faces are swapped!!", cnt);
+    ProgressHandler::Debug("{} faces are swapped!!", cnt);
 }
 
 double Preprocess::getCosAngle(int v_id, int v1_id, int v2_id) {
@@ -413,7 +413,7 @@ double Preprocess::getCosAngle(int v_id, int v1_id, int v2_id) {
 
 void Preprocess::simplify(const GEO::Mesh &geo_mesh, const GEO::MeshFacetsAABBWithEps& face_aabb_tree) {
     int cnt = 0;
-//    logger().debug("queue.size() = {}", sm_queue.size());
+//    ProgressHandler::Debug("queue.size() = {}", sm_queue.size());
     while (!sm_queue.empty()) {
         std::array<int, 2> v_ids = sm_queue.top().v_ids;
         double old_weight = sm_queue.top().weight;
@@ -428,18 +428,18 @@ void Preprocess::simplify(const GEO::Mesh &geo_mesh, const GEO::MeshFacetsAABBWi
         } else {
             cnt++;
             if (cnt % 1000 == 0)
-                logger().debug("1000 vertices removed");
+                ProgressHandler::Debug("1000 vertices removed");
         }
     }
-    logger().debug("{}", cnt);
-    logger().debug("{}", c);
+    ProgressHandler::Debug("{}", cnt);
+    ProgressHandler::Debug("{}", c);
 
     if (cnt > 0)
         postProcess(geo_mesh, face_aabb_tree);
 }
 
 void Preprocess::postProcess(const GEO::Mesh &geo_mesh, const GEO::MeshFacetsAABBWithEps& face_aabb_tree){
-    logger().debug("postProcess!");
+    ProgressHandler::Debug("postProcess!");
 
     std::vector<std::array<int, 2>> tmp_inf_es;
     const int inf_es_size = inf_es.size();
@@ -475,7 +475,7 @@ bool Preprocess::removeAnEdge(int v1_id, int v2_id, const GEO::Mesh &geo_mesh, c
     std::vector<int> n12_f_ids;
     setIntersection(conn_fs[v1_id], conn_fs[v2_id], n12_f_ids);
     if (n12_f_ids.size() != 2) {//!!!
-//        logger().debug("error: n12_f_ids.size()!=2");
+//        ProgressHandler::Debug("error: n12_f_ids.size()!=2");
         return false;
     }
 
@@ -660,8 +660,8 @@ bool Preprocess::isOutEnvelop(const std::unordered_set<int>& new_f_ids,
         ++tri_idx;
         num_samples += ps.size();
 
-//        logger().debug("ps.size = {}", ps.size());
-//        logger().debug("is output samples?");
+//        ProgressHandler::Debug("ps.size = {}", ps.size());
+//        ProgressHandler::Debug("is output samples?");
 //        int anw = 0;
 //        cin >> anw;
 //        if (anw != 0) {
@@ -734,13 +734,13 @@ bool Preprocess::isOutEnvelop(const std::unordered_set<int>& new_f_ids,
             }
             ++num_querried;
             if (sq_dist > state.eps_2) {
-                logger().trace("num_triangles {} / {} num_queries {} / {}",
+                ProgressHandler::Trace("num_triangles {} / {} num_queries {} / {}",
                     tri_idx - 1, num_tris, num_querried, num_samples);
                 return true;
             }
         }
     }
-    logger().trace("num_triangles {} / {} num_queries {} / {}",
+    ProgressHandler::Trace("num_triangles {} / {} num_queries {} / {}",
         tri_idx - 1, num_tris, num_querried, num_samples);
 
     return false;
@@ -772,13 +772,13 @@ int calEuclidean(const std::vector<std::array<int, 3>>& fs){
 }
 
 bool Preprocess::isEuclideanValid(int v1_id, int v2_id){
-//    logger().debug("v1:{}", v1_id);
+//    ProgressHandler::Debug("v1:{}", v1_id);
 //    for (int f_id:conn_fs[v1_id]) {
-//        logger().debug("{}{}{} {}", F_in(f_id, 0), ' ', F_in(f_id, 1), F_in(f_id, 2));
+//        ProgressHandler::Debug("{}{}{} {}", F_in(f_id, 0), ' ', F_in(f_id, 1), F_in(f_id, 2));
 //    }
-//    logger().debug("v2:{}", v2_id);
+//    ProgressHandler::Debug("v2:{}", v2_id);
 //    for (int f_id:conn_fs[v2_id]) {
-//        logger().debug("{}{}{} {}", F_in(f_id, 0), ' ', F_in(f_id, 1), F_in(f_id, 2));
+//        ProgressHandler::Debug("{}{}{} {}", F_in(f_id, 0), ' ', F_in(f_id, 1), F_in(f_id, 2));
 //    }
 
     std::vector<std::array<int, 3>> fs;
@@ -794,9 +794,9 @@ bool Preprocess::isEuclideanValid(int v1_id, int v2_id){
     }
     std::sort(fs.begin(), fs.end());
     fs.erase(std::unique(fs.begin(), fs.end()), fs.end());
-//    logger().debug("fs.size() = {}", fs.size());
+//    ProgressHandler::Debug("fs.size() = {}", fs.size());
     int ec0=calEuclidean(fs);
-//    logger().debug("{}", ec0);
+//    ProgressHandler::Debug("{}", ec0);
 
     std::vector<std::array<int, 3>> fs1;
     for(int i=0;i<fs.size();i++){
@@ -806,7 +806,7 @@ bool Preprocess::isEuclideanValid(int v1_id, int v2_id){
                 break;
             }
         }
-//        logger().debug("{} {} {}", fs[i][0], fs[i][1], fs[i][2]);
+//        ProgressHandler::Debug("{} {} {}", fs[i][0], fs[i][1], fs[i][2]);
         if(fs[i][0]!=fs[i][1]&&fs[i][1]!=fs[i][2]&&fs[i][0]!=fs[i][2]){
             std::array<int, 3> f = {{fs[i][0], fs[i][1], fs[i][2]}};
             std::sort(f.begin(), f.end());
@@ -815,9 +815,9 @@ bool Preprocess::isEuclideanValid(int v1_id, int v2_id){
     }
     std::sort(fs1.begin(), fs1.end());
     fs1.erase(std::unique(fs1.begin(), fs1.end()), fs1.end());
-//    logger().debug("fs1.size() = {}", fs1.size());
+//    ProgressHandler::Debug("fs1.size() = {}", fs1.size());
     int ec1=calEuclidean(fs1);
-//    logger().debug("{}", ec1);
+//    ProgressHandler::Debug("{}", ec1);
 
 //    pausee();
 
@@ -896,7 +896,7 @@ void Preprocess::outputSurfaceColormap(const GEO::MeshFacetsAABBWithEps& geo_fac
 //            geo_face_tree.nearest_facet_with_hint(current_point, prev_facet, nearest_point, sq_dist);
 //            double dis = current_point.distance2(nearest_point);
 //            if(f_id==2514)
-//                logger().debug("{}: {} {} {}", cnt, dis, sq_dist, int(prev_facet));
+//                ProgressHandler::Debug("{}: {} {} {}", cnt, dis, sq_dist, int(prev_facet));
             if (dis > max_dis) {
                 max_dis = dis;
                 pp=current_point;
@@ -907,42 +907,42 @@ void Preprocess::outputSurfaceColormap(const GEO::MeshFacetsAABBWithEps& geo_fac
         cnt = 0;
         if(f_id==1681) {
             for (const GEO::vec3 &p:ps) {
-                logger().debug("{}: {}, {}, {}; {}; {}", cnt, p[0], p[1], p[2], fs[cnt], geo_face_tree.squared_distance(p));
+                ProgressHandler::Debug("{}: {}, {}, {}; {}; {}", cnt, p[0], p[1], p[2], fs[cnt], geo_face_tree.squared_distance(p));
                 cnt++;
             }
         }
 
         eps_dis(f_id) = sqrt(max_dis / state.eps_2);
         if(eps_dis(f_id)>1) {
-            logger().debug("ERROR: simplified input goes outside of the envelop");
-            logger().debug("{}", f_id);
-            logger().debug("{}", eps_dis(f_id));
-            logger().debug("{} {}", max_dis, state.eps_2);
+            ProgressHandler::Debug("ERROR: simplified input goes outside of the envelop");
+            ProgressHandler::Debug("{}", f_id);
+            ProgressHandler::Debug("{}", eps_dis(f_id));
+            ProgressHandler::Debug("{} {}", max_dis, state.eps_2);
             cnt = 0;
             for (const GEO::vec3 &p:ps) {
-                logger().debug("{}: {}, {}, {}; {}; {}", cnt, p[0], p[1], p[2], fs[cnt], geo_face_tree.squared_distance(p));
+                ProgressHandler::Debug("{}: {}, {}, {}; {}; {}", cnt, p[0], p[1], p[2], fs[cnt], geo_face_tree.squared_distance(p));
                 cnt++;
             }
-//            logger().debug("{}", geo_face_tree.squared_distance(pp));
+//            ProgressHandler::Debug("{}", geo_face_tree.squared_distance(pp));
 //            double dd;
-//            logger().debug("{}", int(geo_face_tree.nearest_facet(pp, nearest_point, dd)));
-//            logger().debug("{}", dd);
+//            ProgressHandler::Debug("{}", int(geo_face_tree.nearest_facet(pp, nearest_point, dd)));
+//            ProgressHandler::Debug("{}", dd);
 
             std::vector<int> vf={{1681, 1675, 1671, 1666}};
             for(int j=0;j<vf.size();j++) {
-                logger().debug("f {}: {}", vf[j], GEO::Geom::triangle_area(
+                ProgressHandler::Debug("f {}: {}", vf[j], GEO::Geom::triangle_area(
                         geo_sf_mesh.vertices.point(geo_sf_mesh.facets.vertex(vf[j], 0)),
                         geo_sf_mesh.vertices.point(geo_sf_mesh.facets.vertex(vf[j], 1)),
                         geo_sf_mesh.vertices.point(geo_sf_mesh.facets.vertex(vf[j], 2))));
 
-//                logger().debug("{} {}{}{}", geo_sf_mesh.facets.vertex(vf[j], 0), geo_sf_mesh.facets.vertex(vf[j], 1), " "
+//                ProgressHandler::Debug("{} {}{}{}", geo_sf_mesh.facets.vertex(vf[j], 0), geo_sf_mesh.facets.vertex(vf[j], 1), " "
 //, geo_sf_mesh.facets.vertex(vf[j], 2));
                 int v1_id = geo_sf_mesh.facets.vertex(vf[j], 0);
                 int v2_id = geo_sf_mesh.facets.vertex(vf[j], 1);
                 int v3_id = geo_sf_mesh.facets.vertex(vf[j], 2);
                 std::array<int, 3> v_ids = {{v1_id ,v2_id, v3_id}};
                 for (int k = 0; k < 3; k++) {
-                    logger().debug("{}: {} {} {}", v_ids[k], geo_sf_mesh.vertices.point(v_ids[k])[0], geo_sf_mesh.vertices.point(v_ids[k])[1], geo_sf_mesh.vertices.point(v_ids[k])[2]);
+                    ProgressHandler::Debug("{}: {} {} {}", v_ids[k], geo_sf_mesh.vertices.point(v_ids[k])[0], geo_sf_mesh.vertices.point(v_ids[k])[1], geo_sf_mesh.vertices.point(v_ids[k])[2]);
                 }
             }
 
@@ -970,10 +970,10 @@ void Preprocess::outputSurfaceColormap(const GEO::MeshFacetsAABBWithEps& geo_fac
             }
             for(int i=0;i<geo_sf_mesh.facets.nb();i++) {
                 if(diss[i]==min_dis)
-                    logger().debug("vf_id = {}", i);
+                    ProgressHandler::Debug("vf_id = {}", i);
             }
-            logger().debug("something");
-            logger().debug("double check 1681 {}", GEO::Geom::point_triangle_squared_distance(ps[10],
+            ProgressHandler::Debug("something");
+            ProgressHandler::Debug("double check 1681 {}", GEO::Geom::point_triangle_squared_distance(ps[10],
                                                                       geo_sf_mesh.vertices.point(
                                                                               geo_sf_mesh.facets.vertex(1681, 0)),
                                                                       geo_sf_mesh.vertices.point(
@@ -982,8 +982,8 @@ void Preprocess::outputSurfaceColormap(const GEO::MeshFacetsAABBWithEps& geo_fac
                                                                               geo_sf_mesh.facets.vertex(1681, 2)),
                                                                                    nearest_p, _1, _2, _3));
 
-            logger().debug("min_dis = {}", min_dis);
-            logger().debug("diag = {}", state.bbox_diag);
+            ProgressHandler::Debug("min_dis = {}", min_dis);
+            ProgressHandler::Debug("diag = {}", state.bbox_diag);
         }
 
 

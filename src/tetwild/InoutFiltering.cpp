@@ -10,7 +10,7 @@
 //
 
 #include <tetwild/InoutFiltering.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <tetwild/DisableWarnings.h>
 #include <CGAL/centroid.h>
 #include <tetwild/EnableWarnings.h>
@@ -21,7 +21,7 @@
 namespace tetwild {
 
 void InoutFiltering::filter() {
-    logger().debug("In/out filtering...");
+    ProgressHandler::Debug("In/out filtering...");
 
     Eigen::MatrixXd C(std::count(t_is_removed.begin(), t_is_removed.end(), false), 3);
     int cnt = 0;
@@ -56,7 +56,7 @@ void InoutFiltering::filter() {
     //if the surface is totally reversed
     //TODO: test the correctness
     if(std::count(tmp_t_is_removed.begin(), tmp_t_is_removed.end(), false)==0) {
-        logger().debug("Winding number gives a empty mesh! trying again");
+        ProgressHandler::Debug("Winding number gives a empty mesh! trying again");
         for (int i = 0; i < F.rows(); i++) {
             int tmp = F(i, 1);
             F(i, 1) = F(i, 2);
@@ -78,7 +78,7 @@ void InoutFiltering::filter() {
 //    outputWindingNumberField(W);
 
     t_is_removed = tmp_t_is_removed;
-    logger().debug("In/out Filtered!");
+    ProgressHandler::Debug("In/out Filtered!");
 }
 
 void InoutFiltering::getSurface(Eigen::MatrixXd& V, Eigen::MatrixXi& F){
@@ -155,8 +155,8 @@ void InoutFiltering::outputWindingNumberField(const Eigen::VectorXd& W){
         cnt++;
     }
     mSaver.save_mesh(oV, oT, 3, mSaver.TET);
-    logger().debug("#v = {}", oV.rows() / 3);
-    logger().debug("#t = {}", oT.rows() / 4);
+    ProgressHandler::Debug("#v = {}", oV.rows() / 3);
+    ProgressHandler::Debug("#t = {}", oT.rows() / 4);
 
     mSaver.save_elem_scalar_field("winding number", W);
 }

@@ -11,7 +11,7 @@
 
 #include <tetwild/EdgeRemover.h>
 #include <tetwild/Common.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <unordered_map>
 
 namespace tetwild {
@@ -113,13 +113,13 @@ void EdgeRemover::swap(){
 
         counter++;
     }
-    logger().debug("tmp_cnt3 = {}", tmp_cnt3);
-    logger().debug("tmp_cnt4 = {}", tmp_cnt4);
-    logger().debug("tmp_cnt5 = {}", tmp_cnt5);
-    logger().debug("tmp_cnt6 = {}", tmp_cnt6);
-    logger().debug("{}", cnt5);
+    ProgressHandler::Debug("tmp_cnt3 = {}", tmp_cnt3);
+    ProgressHandler::Debug("tmp_cnt4 = {}", tmp_cnt4);
+    ProgressHandler::Debug("tmp_cnt5 = {}", tmp_cnt5);
+    ProgressHandler::Debug("tmp_cnt6 = {}", tmp_cnt6);
+    ProgressHandler::Debug("{}", cnt5);
 
-    logger().debug("energy_time = {}", energy_time);
+    ProgressHandler::Debug("energy_time = {}", energy_time);
 }
 
 bool EdgeRemover::removeAnEdge_32(int v1_id, int v2_id, const std::vector<int>& old_t_ids) {

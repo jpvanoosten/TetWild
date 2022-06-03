@@ -10,15 +10,15 @@
 //
 
 #include <tetwild/TetmeshElements.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <tetwild/Serialization.h>
 
 namespace tetwild {
 
 void TetVertex::printInfo() const {
-    logger().debug("is_on_surface = {}", is_on_surface);
-    logger().debug("is_on_bbox = {}", is_on_bbox);
-    logger().debug("conn_tets = {}", conn_tets);
+    ProgressHandler::Debug("is_on_surface = {}", is_on_surface);
+    ProgressHandler::Debug("is_on_bbox = {}", is_on_bbox);
+    ProgressHandler::Debug("conn_tets = {}", conn_tets);
 }
 
 void Stage::serialize(std::string serialize_file) {

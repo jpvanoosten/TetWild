@@ -12,7 +12,7 @@
 #include <tetwild/DelaunayTetrahedralization.h>
 #include <tetwild/Args.h>
 #include <tetwild/State.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <CGAL/bounding_box.h>
 #include <igl/readOFF.h>
 #include <igl/readSTL.h>
@@ -313,7 +313,7 @@ void DelaunayTetrahedralization::tetra(const std::vector<Point_3>& m_vertices, G
     for(int i=0;i<voxel_points.size();i++) {
         points.push_back(std::make_pair(voxel_points[i], m_vertices_size + 8 + i));
     }
-    logger().debug("{} voxel points are added!", voxel_points.size());
+    ProgressHandler::Debug("{} voxel points are added!", voxel_points.size());
 
     Delaunay T(points.begin(), points.end());
 //    if(!T.is_valid()){

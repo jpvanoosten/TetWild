@@ -11,7 +11,7 @@
 
 #include <tetwild/SimpleTetrahedralization.h>
 #include <tetwild/Common.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <igl/winding_number.h>
 #include <igl/Timer.h>
 #include <bitset>
@@ -49,7 +49,7 @@ void SimpleTetrahedralization::tetra(std::vector<TetVertex>& tet_vertices, std::
 
     ///cal arrangement & tetrahedralization
     triangulation(tet_vertices, tets);
-    logger().debug("#v = {} #t = {}", tet_vertices.size(), tets.size());
+    ProgressHandler::Debug("#v = {} #t = {}", tet_vertices.size(), tets.size());
 
     for (int i = 0; i < tets.size(); i++) {
         for (int j = 0; j < 4; j++) {
@@ -211,7 +211,7 @@ void SimpleTetrahedralization::triangulation(std::vector<TetVertex>& tet_vertice
             bsp_faces[i].edges.push_back(bsp_edges.size() - 1);
         }
     }
-    logger().debug("2D arr {}", tmp_timer.getElapsedTime());
+    ProgressHandler::Debug("2D arr {}", tmp_timer.getElapsedTime());
     tmp_timer.start();
 
     tet_vertices.reserve(bsp_vertices.size() + bsp_nodes.size());
@@ -264,7 +264,7 @@ void SimpleTetrahedralization::triangulation(std::vector<TetVertex>& tet_vertice
         }
     }
 
-    logger().debug("improvement {}", tmp_timer.getElapsedTime());
+    ProgressHandler::Debug("improvement {}", tmp_timer.getElapsedTime());
     tmp_timer.start();
     ///cal CDT & insert tets
     std::vector<std::vector<std::array<int, 3>>> cdt_faces(bsp_faces.size(), std::vector<std::array<int, 3>>());
@@ -289,7 +289,7 @@ void SimpleTetrahedralization::triangulation(std::vector<TetVertex>& tet_vertice
                                   MC.to2d(bsp_vertices[bsp_edges[bsp_faces[i].edges[j]].vertices[1]]));
         }
         if(cdt.number_of_vertices() != bsp_faces[i].vertices.size()){
-            logger().debug("error: cdt.number_of_vertices() != bsp_faces[i].vertices.size()");
+            ProgressHandler::Debug("error: cdt.number_of_vertices() != bsp_faces[i].vertices.size()");
         }
         std::map<Point_2, int> vs_cdt2bsp;
         for (int j = 0; j < bsp_faces[i].vertices.size(); j++) {
@@ -372,10 +372,10 @@ void SimpleTetrahedralization::triangulation(std::vector<TetVertex>& tet_vertice
             //todo: calculate a new position
         }
     }
-    logger().debug("all_cnt = {}", all_cnt);
-    logger().debug("rounded_cnt = {}", rounded_cnt);
+    ProgressHandler::Debug("all_cnt = {}", all_cnt);
+    ProgressHandler::Debug("rounded_cnt = {}", rounded_cnt);
 
-    logger().debug("CDT {}", tmp_timer.getElapsedTime());
+    ProgressHandler::Debug("CDT {}", tmp_timer.getElapsedTime());
 }
 
 void SimpleTetrahedralization::labelSurface(const std::vector<int>& m_f_tags, const std::vector<int>& m_e_tags,
@@ -575,7 +575,7 @@ void SimpleTetrahedralization::labelSurface(const std::vector<int>& m_f_tags, co
                     else
                         is_surface_fs[i][j] -= delta;
 //                    else {
-//                        logger().debug("wrong direction!!");
+//                        ProgressHandler::Debug("wrong direction!!");
 //                        pausee();
 //                    }
                 }
@@ -665,7 +665,7 @@ void SimpleTetrahedralization::labelBbox(std::vector<TetVertex>& tet_vertices, s
             i7 = I;
         i++;
     }
-    logger().debug("#v on bbox = {}", i);
+    ProgressHandler::Debug("#v on bbox = {}", i);
 }
 
 void SimpleTetrahedralization::labelBoundary(std::vector<TetVertex>& tet_vertices, std::vector<std::array<int, 4>>& tets,
@@ -722,8 +722,8 @@ void SimpleTetrahedralization::labelBoundary(std::vector<TetVertex>& tet_vertice
         if (tet_vertices[i].is_on_surface)
             cnt_surface++;
     }
-    logger().debug("{} vertices on boundary", cnt_boundary);
-    logger().debug("{} vertices on surface", cnt_surface);
+    ProgressHandler::Debug("{} vertices on boundary", cnt_boundary);
+    ProgressHandler::Debug("{} vertices on surface", cnt_surface);
 }
 
 void SimpleTetrahedralization::constructPlane(int bsp_f_id, Plane_3& pln) {

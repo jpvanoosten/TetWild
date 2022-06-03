@@ -10,7 +10,7 @@
 //
 
 #include <tetwild/MeshConformer.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 
 namespace tetwild {
 
@@ -176,7 +176,7 @@ void MeshConformer::matchDivFaces() {
             seed_nids.insert(new_nids.begin(), new_nids.end());//c++11
         }
     }
-    logger().debug("{} faces matched!", std::count(is_matched.begin(), is_matched.end(), true));
+    ProgressHandler::Debug("{} faces matched!", std::count(is_matched.begin(), is_matched.end(), true));
 }
 
 void MeshConformer::getOrientedVertices(int bsp_f_id){
@@ -209,7 +209,7 @@ void MeshConformer::getOrientedVertices(int bsp_f_id){
     bsp_faces[bsp_f_id].vertices=vertices;
 
     if(vertices.size()!=bsp_faces[bsp_f_id].vertices.size()){
-        logger().error("{}, {}", bsp_faces[bsp_f_id].vertices.size(), bsp_faces[bsp_f_id].edges.size());
+        ProgressHandler::Error("{}, {}", bsp_faces[bsp_f_id].vertices.size(), bsp_faces[bsp_f_id].edges.size());
         throw TetWildError("MeshConformer::getOrientedVertices");
     }
 }

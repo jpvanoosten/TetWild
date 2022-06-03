@@ -12,7 +12,7 @@
 #include <tetwild/Common.h>
 #include <tetwild/Args.h>
 #include <tetwild/State.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <geogram/basic/permutation.h>
 #include <geogram/mesh/mesh_reorder.h>
 #include <geogram/mesh/mesh.h>
@@ -40,7 +40,7 @@ void addRecord(const MeshRecord& record, const Args &args, const State &state) {
 }
 
 void pausee(){
-    logger().debug("Is pausing... (Enter '0' to exit and other characters to continue.)");
+    ProgressHandler::Debug("Is pausing... (Enter '0' to exit and other characters to continue.)");
     char c;
     std::cin>>c;
     if(c=='0')

@@ -8,7 +8,7 @@
 
 #include <tetwild/tetwild.h>
 #include <tetwild/Common.h>
-#include <tetwild/Logger.h>
+#include <tetwild/ProgressHandler.h>
 #include <tetwild/MeshRefinement.h>
 #include <igl/read_triangle_mesh.h>
 #include <igl/write_triangle_mesh.h>
@@ -27,7 +27,7 @@ namespace tetwild {
 void saveFinalTetmesh(const std::string &output_volume, const std::string &output_surface,
     const Eigen::MatrixXd &V, const Eigen::MatrixXi &T, const Eigen::VectorXd &A)
 {
-    logger().debug("Writing mesh to {}...", output_volume);
+    ProgressHandler::Debug("Writing mesh to {}...", output_volume);
     std::string output_format = output_volume.substr(output_volume.size() - 4, 4);
     if (output_format == "mesh") {
         std::ofstream f(output_volume);
