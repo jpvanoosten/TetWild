@@ -13,15 +13,20 @@
 // Windows Header Files
 #include <Windows.h>
 
+#include <igl/writeOBJ.h>
+#include <pymesh/MshSaver.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/base_sink.h>
 #include <tetwild/tetwild.h>
 #include <tetwild/ProgressHandler.h>
 
 #include <atomic>
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <thread>
+
+namespace fs = std::filesystem;
 
 #include "PluginAPI/IUnityEventQueue.h"
 //#include "PluginAPI/IUnityGraphics.h"

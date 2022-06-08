@@ -99,7 +99,32 @@ private:
 	mutable int currentStep = 0;
 };
 
-static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi& FI)
+void saveFinalTetmesh(const fs::path& output_volume, const fs::path& output_surface, const Eigen::MatrixXd& V, const Eigen::MatrixXi& T, const Eigen::VectorXd& A)
+{
+	ProgressHandler::Info("Writing tetmesh mesh to {}...", output_volume.string());
+
+	PyMesh::MshSaver mSaver(output_volume.string(), true);
+	PyMesh::VectorF V_flat(V.size());
+	PyMesh::VectorI T_flat(T.size());
+	Eigen::MatrixXd VV = V.transpose();
+	Eigen::MatrixXi TT = T.transpose();
+	std::copy_n(VV.data(), V.size(), V_flat.data());
+	std::copy_n(TT.data(), T.size(), T_flat.data());
+
+	mSaver.save_mesh(V_flat, T_flat, 3, mSaver.TET);
+	mSaver.save_elem_scalar_field("min_dihedral_angle", A);
+
+	ProgressHandler::Info("Writing surface mesh to {}...", output_surface.string());
+
+	// Extract and save a surface mesh.
+	Eigen::MatrixXd V_sf;
+	Eigen::MatrixXi F_sf;
+	tetwild::extractSurfaceMesh(V, T, V_sf, F_sf);
+
+	igl::writeOBJ(output_surface.string(), V_sf, F_sf);
+}
+
+static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi& FI, const fs::path& output_mesh )
 {
 	tetwild::ProgressHandler::SetProgressHandler(std::make_shared<ProgressHandler>(55));
 
@@ -113,12 +138,16 @@ static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi&
 
 	tetrahedralization(VI, FI, VO, TO, AO, args);
 
-	tetwild::ProgressHandler::Info("Mesh tetrahedralization complete!");
+	const fs::path output_surface = (output_mesh.parent_path() / output_mesh.stem()).string() + "_sf.obj";
+	saveFinalTetmesh(output_mesh, output_surface, VO, TO, AO);
 
-	tetwild::ProgressHandler::SetProgressHandler(nullptr);
+	tetwild::ProgressHandler::Info("Mesh tetrahedralization complete!");
 
 	// Notify Unity the operation is complete.
 	SendCompleteMessage();
+
+	// Remove progress handler.
+	tetwild::ProgressHandler::SetProgressHandler(nullptr);
 }
 
 #ifdef __cplusplus
@@ -155,8 +184,8 @@ extern "C"
 	{
 		completeCallback = cb;
 	}
-	
-	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices)
+
+	void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API TetWildPlugin_TetrahedralizeMesh(int numVertices, const double3* vertices, int numIndices, const int* indices, const char* output_mesh )
 	{
 		Eigen::MatrixXd VI;
 		Eigen::MatrixXi FI;
@@ -175,7 +204,7 @@ extern "C"
 			FI.row(i) << indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2];
 		}
 
-		std::thread t{ &TetrahedralizeMesh, std::move(VI), std::move(FI) };
+		std::thread t{ &TetrahedralizeMesh, std::move(VI), std::move(FI), output_mesh };
 		t.detach();
 	}
 

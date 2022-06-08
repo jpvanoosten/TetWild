@@ -28,6 +28,10 @@ target_compile_definitions( TetWildPlugin
 	INTERFACE TetWildPlugin_IMPORTS
 )
 
+target_compile_features(TetWildPlugin 
+	PUBLIC cxx_std_17
+)
+
 target_link_libraries( TetWildPlugin 
 		libTetWild
 )
