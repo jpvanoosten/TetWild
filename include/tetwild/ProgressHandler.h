@@ -101,6 +101,18 @@ namespace tetwild
 		}
 
 		/// <summary>
+		/// Set the task progress.
+		/// </summary>
+		///	<param name="progress">The progress of the task (in %)</param>
+		static void SetProgress(float progress)
+		{
+		    if(s_ProgressHandler)
+		    {
+				s_ProgressHandler->DoSetProgress(progress);
+		    }
+		}
+
+		/// <summary>
 		/// Check if the current operation should continue or quit.
 		/// </summary>
 		/// <returns>`true` to continue the current operation, or `false` to cancel the current operation.</returns>
@@ -133,6 +145,12 @@ namespace tetwild
 		/// <param name="level"></param>
 		/// <param name="message">A progress message to display.</param>
 		virtual void DoMessage(spdlog::level::level_enum level, const std::string& message) const = 0;
+
+		/// <summary>
+		/// Override this method to update the task progress.
+		/// </summary>
+		///	<param name="progress">The task progress (in %)</param>
+		virtual void DoSetProgress(float progress) {}
 
 		/// <summary>
 		/// Check if the current operation should continue or quit.
@@ -178,7 +196,7 @@ namespace tetwild
 	// Implementation of a default progress handler:
 	class DefaultProgressHandler : public ProgressHandler
 	{
-	public:
+	protected:
 		void DoMessage(spdlog::level::level_enum lvl, const std::string& message ) const override
 		{
 			logger().log(lvl, message);

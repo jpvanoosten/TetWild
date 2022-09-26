@@ -120,6 +120,7 @@ void extractFinalTetmesh(MeshRefinement& MR,
         IOF.filter();
         t_cnt = std::count(t_is_removed.begin(), t_is_removed.end(), false);
         tmp_time = igl_timer.getElapsedTime();
+
         ProgressHandler::Info("time = {}s", tmp_time);
         ProgressHandler::Debug("{} tets inside!", t_cnt);
     }
@@ -181,6 +182,7 @@ double tetwild_stage_one_preprocess(
 {
     igl::Timer igl_timer;
     igl_timer.start();
+    ProgressHandler::SetProgress(1.0f);
     ProgressHandler::Info("Preprocessing...");
     Preprocess pp(state);
     if (!pp.init(VI, FI, geo_b_mesh, geo_sf_mesh, args)) {
@@ -200,7 +202,10 @@ double tetwild_stage_one_preprocess(
     pp.process(geo_sf_mesh, m_vertices, m_faces, args);
     double tmp_time = igl_timer.getElapsedTime();
     addRecord(MeshRecord(MeshRecord::OpType::OP_PREPROCESSING, tmp_time, m_vertices.size(), m_faces.size()), args, state);
+
+    ProgressHandler::SetProgress(5.0f);
     ProgressHandler::Info("time = {}s", tmp_time);
+
     return tmp_time;
 }
 
@@ -223,6 +228,8 @@ double tetwild_stage_one_delaunay(
 {
     igl::Timer igl_timer;
     igl_timer.start();
+
+    ProgressHandler::SetProgress(10.0f);
     ProgressHandler::Info("Delaunay tetrahedralizing...");
     DelaunayTetrahedralization DT;
     m_f_tags.clear();
@@ -238,7 +245,10 @@ double tetwild_stage_one_delaunay(
     ProgressHandler::Debug("# bsp_edges = {}", bsp_edges.size());
     ProgressHandler::Debug("# bsp_faces = {}", bsp_faces.size());
     ProgressHandler::Debug("# bsp_nodes = {}", bsp_nodes.size());
+
+    ProgressHandler::SetProgress(20.0f);
     ProgressHandler::Info("Delaunay tetrahedralization done!");
+
     double tmp_time = igl_timer.getElapsedTime();
     addRecord(MeshRecord(MeshRecord::OpType::OP_DELAUNEY_TETRA, tmp_time, bsp_vertices.size(), bsp_nodes.size()), args, state);
     ProgressHandler::Info("time = {}s", tmp_time);
@@ -255,8 +265,10 @@ double tetwild_stage_one_mc(
 {
     igl::Timer igl_timer;
     igl_timer.start();
+    ProgressHandler::SetProgress(33.0f);
     ProgressHandler::Info("Divfaces matching...");
     MC.match();
+    //ProgressHandler::SetProgress(40.0f);
     ProgressHandler::Info("Divfaces matching done!");
     double tmp_time = igl_timer.getElapsedTime();
     addRecord(MeshRecord(MeshRecord::OpType::OP_DIVFACE_MATCH, tmp_time, MC.bsp_vertices.size(), MC.bsp_nodes.size()), args, state);
@@ -359,16 +371,20 @@ void tetwild_stage_one(
         bsp_vertices, bsp_edges, bsp_faces, bsp_nodes, m_f_tags, raw_e_tags, raw_conn_e4v);
 
     //mesh conforming
+    ProgressHandler::SetProgress(10.0f);
     MeshConformer MC(m_vertices, m_faces, bsp_vertices, bsp_edges, bsp_faces, bsp_nodes);
     sum_time += tetwild_stage_one_mc(args, state, MC);
 
+    ProgressHandler::SetProgress(35.0f);
     //bsp subdivision
     sum_time += tetwild_stage_one_bsp(args, state, MC);
 
+    ProgressHandler::SetProgress(45.0f);
     //simple tetrahedralization
     sum_time += tetwild_stage_one_tetra(args, state, MC, m_f_tags, raw_e_tags, raw_conn_e4v,
         tet_vertices, tet_indices, is_surface_facet);
 
+    ProgressHandler::SetProgress(50.0f);
     ProgressHandler::Info("Total time for the first stage = {}s", sum_time);
 }
 
@@ -385,12 +401,14 @@ void tetwild_stage_two(const Args &args, State &state,
     Eigen::VectorXd &AO)
 {
     //init
+    ProgressHandler::SetProgress(51.0f);
     ProgressHandler::Info("Refinement initializing...");
     MeshRefinement MR(geo_sf_mesh, geo_b_mesh, args, state);
     MR.tet_vertices = std::move(tet_vertices);
     MR.tets = std::move(tet_indices);
     MR.is_surface_fs = std::move(is_surface_facet);
     MR.prepareData();
+    ProgressHandler::SetProgress(52.0f);
     ProgressHandler::Info("Refinement initialization done!");
 
     //improvement

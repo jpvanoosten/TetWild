@@ -68,12 +68,16 @@ using UnitySink_mt = UnitySink<std::mutex>;
 class ProgressHandler : public tetwild::ProgressHandler
 {
 public:
-	ProgressHandler(int totalSteps)
-		:totalSteps(totalSteps)
-		, currentStep(0)
+	ProgressHandler()
+	    :m_Progress(0.0f)
 	{}
 
 protected:
+	void DoSetProgress(float progress) override
+	{
+		m_Progress = progress;
+	}
+
 	void DoMessage(spdlog::level::level_enum level, const std::string& message) const override
 	{
 		switch (level)
@@ -82,9 +86,7 @@ protected:
 		case spdlog::level::debug:
 			break;
 		case spdlog::level::info:
-			currentStep++;
-			SendProgressUpdate(static_cast<float>(currentStep) / static_cast<float>(totalSteps) * 100.0f, message.c_str());
-			//SendProgressUpdate(currentStep, message.c_str());
+			SendProgressUpdate(m_Progress, message.c_str());
 			break;
 		case spdlog::level::warn:
 		case spdlog::level::err:
@@ -95,12 +97,12 @@ protected:
 	}
 
 private:
-	int totalSteps = 1;
-	mutable int currentStep = 0;
+	float m_Progress;
 };
 
 void saveFinalTetmesh(const fs::path& output_volume, const fs::path& output_surface, const Eigen::MatrixXd& V, const Eigen::MatrixXi& T, const Eigen::VectorXd& A)
 {
+	ProgressHandler::SetProgress(90.0f);
 	ProgressHandler::Info("Writing tetmesh mesh to {}...", output_volume.string());
 
 	PyMesh::MshSaver mSaver(output_volume.string(), true);
@@ -114,6 +116,7 @@ void saveFinalTetmesh(const fs::path& output_volume, const fs::path& output_surf
 	mSaver.save_mesh(V_flat, T_flat, 3, mSaver.TET);
 	mSaver.save_elem_scalar_field("min_dihedral_angle", A);
 
+	ProgressHandler::SetProgress(95.0f);
 	ProgressHandler::Info("Writing surface mesh to {}...", output_surface.string());
 
 	// Extract and save a surface mesh.
@@ -126,7 +129,7 @@ void saveFinalTetmesh(const fs::path& output_volume, const fs::path& output_surf
 
 static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi& FI, const fs::path& output_mesh )
 {
-	tetwild::ProgressHandler::SetProgressHandler(std::make_shared<ProgressHandler>(55));
+	tetwild::ProgressHandler::SetProgressHandler(std::make_shared<ProgressHandler>());
 
 	tetwild::Args args;
 
@@ -134,6 +137,7 @@ static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi&
 	Eigen::MatrixXi TO;
 	Eigen::VectorXd AO;
 
+	ProgressHandler::SetProgress(0.0f);
 	tetwild::ProgressHandler::Info("Starting mesh tetrahedralization...");
 
 	tetrahedralization(VI, FI, VO, TO, AO, args);
@@ -141,6 +145,7 @@ static void TetrahedralizeMesh(const Eigen::MatrixXd& VI, const Eigen::MatrixXi&
 	const fs::path output_surface = (output_mesh.parent_path() / output_mesh.stem()).string() + "_sf.obj";
 	saveFinalTetmesh(output_mesh, output_surface, VO, TO, AO);
 
+	tetwild::ProgressHandler::SetProgress(100.0f);
 	tetwild::ProgressHandler::Info("Mesh tetrahedralization complete!");
 
 	// Notify Unity the operation is complete.
